@@ -2,11 +2,9 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
-use std::vec::*;
 
 #[derive(Debug)]
 struct Node<T> {
@@ -22,6 +20,7 @@ impl<T> Node<T> {
         }
     }
 }
+
 #[derive(Debug)]
 struct LinkedList<T> {
     length: u32,
@@ -29,13 +28,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: Clone + PartialOrd> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: Clone + PartialOrd> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -69,21 +68,43 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
+
+	pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self {
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        let mut list_res = LinkedList::<T>::default();
+        list_res.length = list_a.length + list_b.length;
+        let mut node_some_a = list_a.start;
+        let mut node_some_b = list_b.start;
+        loop {
+            if node_some_a.is_some() && (node_some_b.is_none() || Self::cmp(&node_some_a.unwrap(), &node_some_b.unwrap())) {
+                let val;
+                unsafe {
+                    val = node_some_a.unwrap().as_ref().val.clone();
+                    node_some_a = node_some_a.unwrap().as_ref().next;
+                }
+                list_res.add(val);
+            } else if node_some_b.is_none() {
+                break;
+            } else {
+                let val;
+                unsafe {
+                    val = node_some_b.unwrap().as_ref().val.clone();
+                    node_some_b = node_some_b.unwrap().as_ref().next;
+                }
+                list_res.add(val);
+            }
         }
+        list_res
 	}
+
+    fn cmp(node_nonnull_a: &NonNull<Node<T>>, node_nonnull_b: &NonNull<Node<T>>) -> bool {
+        unsafe {
+            node_nonnull_a.as_ref().val < node_nonnull_b.as_ref().val
+        }
+    }
 }
 
-impl<T> Display for LinkedList<T>
-where
-    T: Display,
-{
+impl<T: Display> Display for LinkedList<T> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.start {
             Some(node) => write!(f, "{}", unsafe { node.as_ref() }),
@@ -92,10 +113,7 @@ where
     }
 }
 
-impl<T> Display for Node<T>
-where
-    T: Display,
-{
+impl<T: Display> Display for Node<T> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.next {
             Some(node) => write!(f, "{}, {}", self.val, unsafe { node.as_ref() }),
@@ -103,6 +121,8 @@ where
         }
     }
 }
+
+fn main() {}
 
 #[cfg(test)]
 mod tests {

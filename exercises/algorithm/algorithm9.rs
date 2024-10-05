@@ -2,24 +2,20 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
 
+#[derive(Debug)]
 pub struct Heap<T>
-where
-    T: Default,
-{
+where T: Default + std::fmt::Debug {
     count: usize,
     items: Vec<T>,
     comparator: fn(&T, &T) -> bool,
 }
 
 impl<T> Heap<T>
-where
-    T: Default,
-{
+where T: Default + std::fmt::Debug {
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
@@ -38,6 +34,15 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+        self.items.push(value);
+        self.count += 1;
+        let mut idx = self.count;
+        let mut fat = self.parent_idx(idx);
+        while fat != 0 && (self.comparator)(self.items.get(idx).unwrap(), self.items.get(fat).unwrap()) {
+            unsafe { std::ptr::swap(self.items.as_mut_ptr().add(idx), self.items.as_mut_ptr().add(fat)) }
+            idx = fat;
+            fat = self.parent_idx(idx);
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,14 +63,22 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+        let lhs = self.left_child_idx(idx);
+        let rhs = self.right_child_idx(idx);
+        if lhs > self.count {
+            0
+        } else if rhs > self.count {
+            lhs
+        } else if (self.comparator)(self.items.get(lhs).unwrap(), self.items.get(rhs).unwrap()) {
+            lhs
+        } else {
+            rhs
+        }
     }
 }
 
 impl<T> Heap<T>
-where
-    T: Default + Ord,
-{
+where T: Default + Ord + std::fmt::Debug {
     /// Create a new MinHeap
     pub fn new_min() -> Self {
         Self::new(|a, b| a < b)
@@ -78,14 +91,26 @@ where
 }
 
 impl<T> Iterator for Heap<T>
-where
-    T: Default,
-{
+where T: Default + std::fmt::Debug {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+        if self.count == 0 {
+            None
+        } else {
+            unsafe { std::ptr::swap(self.items.as_mut_ptr().add(1), self.items.as_mut_ptr().add(self.count)) }
+            let ret = self.items.pop();
+            self.count -= 1;
+            let mut idx = 1;
+            let mut nxt = self.smallest_child_idx(idx);
+            while nxt != 0 && (self.comparator)(self.items.get(nxt).unwrap(), self.items.get(idx).unwrap()) {
+                unsafe { std::ptr::swap(self.items.as_mut_ptr().add(nxt), self.items.as_mut_ptr().add(idx)) }
+                idx = nxt;
+                nxt = self.smallest_child_idx(idx);
+            }
+            ret
+        }
     }
 }
 
@@ -94,9 +119,7 @@ pub struct MinHeap;
 impl MinHeap {
     #[allow(clippy::new_ret_no_self)]
     pub fn new<T>() -> Heap<T>
-    where
-        T: Default + Ord,
-    {
+    where T: Default + Ord + std::fmt::Debug {
         Heap::new(|a, b| a < b)
     }
 }
@@ -106,12 +129,12 @@ pub struct MaxHeap;
 impl MaxHeap {
     #[allow(clippy::new_ret_no_self)]
     pub fn new<T>() -> Heap<T>
-    where
-        T: Default + Ord,
-    {
+    where T: Default + Ord + std::fmt::Debug {
         Heap::new(|a, b| a > b)
     }
 }
+
+fn main() {}
 
 #[cfg(test)]
 mod tests {

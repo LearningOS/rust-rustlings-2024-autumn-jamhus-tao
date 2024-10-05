@@ -3,9 +3,7 @@
 	This problem requires you to implement a basic interface for a binary tree
 */
 
-//I AM NOT DONE
-use std::cmp::Ordering;
-use std::fmt::Debug;
+use std::{cmp::Ordering, fmt::Debug};
 
 
 #[derive(Debug)]
@@ -51,25 +49,73 @@ where
     // Insert a value into the BST
     fn insert(&mut self, value: T) {
         //TODO
+        match &mut self.root {
+            None => self.root = Some(Box::new(TreeNode::new(value))),
+            Some(p) => {
+                unsafe {
+                    let mut ptr: *mut TreeNode<T> = p.as_mut();
+                    loop {
+                        match value.cmp(&(*ptr).value) {
+                            Ordering::Less => {
+                                match &mut (*ptr).left {
+                                    Some(left) => {
+                                        ptr = left.as_mut();
+                                    },
+                                    None => {
+                                        (*ptr).left = Some(Box::new(TreeNode::new(value)));
+                                        break;
+                                    },
+                                }
+                            },
+                            Ordering::Equal => break,
+                            Ordering::Greater => {
+                                match &mut (*ptr).right {
+                                    Some(right) => {
+                                        ptr = right.as_mut();
+                                    },
+                                    None => {
+                                        (*ptr).right = Some(Box::new(TreeNode::new(value)));
+                                        break;
+                                    },
+                                }
+                            },
+                        }
+                    } 
+                }
+            }
+        }
     }
 
     // Search for a value in the BST
     fn search(&self, value: T) -> bool {
         //TODO
-        true
+        match &self.root {
+            None => false,
+            Some(p) => {
+                let mut ptr = p;
+                loop {
+                    match value.cmp(&ptr.value) {
+                        Ordering::Less => {
+                            match &ptr.left {
+                                Some(left) => ptr = left,
+                                None => return false,
+                            }
+                        }, 
+                        Ordering::Equal => return true,
+                        Ordering::Greater => {
+                            match &ptr.right {
+                                Some(right) => ptr = right,
+                                None => return false,
+                            }
+                        },
+                    }
+                }
+            },
+        }
     }
 }
 
-impl<T> TreeNode<T>
-where
-    T: Ord,
-{
-    // Insert a node into the tree
-    fn insert(&mut self, value: T) {
-        //TODO
-    }
-}
-
+fn main() {}
 
 #[cfg(test)]
 mod tests {

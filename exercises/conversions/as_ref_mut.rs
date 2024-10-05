@@ -7,25 +7,36 @@
 // Execute `rustlings hint as_ref_mut` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
+// AsRef and AsMut allow for cheap reference-to-reference conversions. Read more
+// about them at https://doc.rust-lang.org/std/convert/trait.AsRef.html and
+// https://doc.rust-lang.org/std/convert/trait.AsMut.html, respectively.
+
+use std::{convert::{AsMut, AsRef}, ops::MulAssign};
 
 // Obtain the number of bytes (not characters) in the given argument.
-// TODO: Add the AsRef trait appropriately as a trait bound.
-fn byte_counter<T>(arg: T) -> usize {
-    arg.as_ref().as_bytes().len()
+// TODO: Add the `AsRef` trait appropriately as a trait bound.
+fn byte_counter<T>(arg: T) -> usize
+    where T: AsRef<str> {
+  arg.as_ref().as_bytes().len()
 }
 
 // Obtain the number of characters (not bytes) in the given argument.
-// TODO: Add the AsRef trait appropriately as a trait bound.
-fn char_counter<T>(arg: T) -> usize {
-    arg.as_ref().chars().count()
+// TODO: Add the `AsRef` trait appropriately as a trait bound.
+fn char_counter<T: AsRef<str>>(arg: T) -> usize {
+  arg.as_ref().chars().count()
 }
 
-// Squares a number using as_mut().
+// Squares a number using `as_mut()`.
 // TODO: Add the appropriate trait bound.
-fn num_sq<T>(arg: &mut T) {
-    // TODO: Implement the function body.
-    ???
+fn num_sq<T, U>(arg: &mut T)
+    where T: AsMut<U>, U: MulAssign + Clone {
+  // TODO: Implement the function body.
+  let that = arg.as_mut().clone();
+  arg.as_mut().mul_assign(that);
+}
+
+fn main() {
+    // You can optionally experiment here.
 }
 
 #[cfg(test)]
@@ -57,7 +68,7 @@ mod tests {
     }
 
     #[test]
-    fn mult_box() {
+    fn mut_box() {
         let mut num: Box<u32> = Box::new(3);
         num_sq(&mut num);
         assert_eq!(*num, 9);

@@ -5,17 +5,19 @@
 // Execute `rustlings hint lifetimes3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
+// Lifetimes are also needed when structs hold references.
 
-struct Book {
-    author: &str,
-    title: &str,
+// TODO: Fix the compiler errors about the struct.
+struct Book<'a> {
+    author: &'a str,
+    title: &'a str,
 }
 
 fn main() {
-    let name = String::from("Jill Smith");
-    let title = String::from("Fish Flying");
-    let book = Book { author: &name, title: &title };
+    let book = Book {
+        author: "George Orwell",
+        title: "1984",
+    };
 
     println!("{} by {}", book.title, book.author);
 }

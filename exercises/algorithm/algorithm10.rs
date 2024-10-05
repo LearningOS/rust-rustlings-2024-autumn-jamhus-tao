@@ -2,10 +2,10 @@
 	graph
 	This problem requires you to implement a basic graph functio
 */
-// I AM NOT DONE
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
+
 #[derive(Debug, Clone)]
 pub struct NodeNotInGraph;
 impl fmt::Display for NodeNotInGraph {
@@ -13,6 +13,7 @@ impl fmt::Display for NodeNotInGraph {
         write!(f, "accessing a node that is not in the graph")
     }
 }
+
 pub struct UndirectedGraph {
     adjacency_table: HashMap<String, Vec<(String, i32)>>,
 }
@@ -30,18 +31,50 @@ impl Graph for UndirectedGraph {
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
         //TODO
+        match self.adjacency_table().get(edge.0) {
+            None => { self.add_node(edge.0); },
+            _ => (),
+        }
+        match self.adjacency_table().get(edge.1) {
+            None => { self.add_node(edge.1); },
+            _ => (),
+        }
+        match self.adjacency_table_mutable().get_mut(edge.0) {
+            Some(adj) => adj.push((edge.1.to_string(), edge.2)),
+            _ => (),
+        }
+        match self.adjacency_table_mutable().get_mut(edge.1) {
+            Some(adj) => adj.push((edge.0.to_string(), edge.2)),
+            _ => (),
+        }
     }
 }
+
 pub trait Graph {
     fn new() -> Self;
     fn adjacency_table_mutable(&mut self) -> &mut HashMap<String, Vec<(String, i32)>>;
     fn adjacency_table(&self) -> &HashMap<String, Vec<(String, i32)>>;
     fn add_node(&mut self, node: &str) -> bool {
         //TODO
-		true
+        match self.adjacency_table_mutable().insert(node.to_string(), Vec::<_>::new()) {
+            None => false, 
+            _ => true,
+        }
     }
     fn add_edge(&mut self, edge: (&str, &str, i32)) {
         //TODO
+        match self.adjacency_table().get(edge.0) {
+            None => { self.add_node(edge.0); },
+            _ => (),
+        }
+        match self.adjacency_table().get(edge.1) {
+            None => { self.add_node(edge.1); },
+            _ => (),
+        }
+        match self.adjacency_table_mutable().get_mut(edge.0) {
+            Some(adj) => adj.push((edge.1.to_string(), edge.2)),
+            _ => (),
+        }
     }
     fn contains(&self, node: &str) -> bool {
         self.adjacency_table().get(node).is_some()
@@ -59,6 +92,9 @@ pub trait Graph {
         edges
     }
 }
+
+fn main() {}
+
 #[cfg(test)]
 mod test_undirected_graph {
     use super::Graph;

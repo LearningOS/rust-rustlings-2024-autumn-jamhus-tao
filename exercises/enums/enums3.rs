@@ -5,68 +5,99 @@
 // Execute `rustlings hint enums3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
-
-enum Message {
-    // TODO: implement the message variant types based on their usage below
+struct Point {
+  x: u64,
+  y: u64,
 }
 
-struct Point {
-    x: u8,
-    y: u8,
+enum Message {
+  // TODO: Implement the message variant types based on their usage below.
+  Resize{ width: u64, height: u64 },
+  Move(Point),
+  Echo(String),
+  ChangeColor( u8, u8, u8 ),
+  Quit,
 }
 
 struct State {
-    color: (u8, u8, u8),
-    position: Point,
-    quit: bool,
-    message: String
+  width: u64,
+  height: u64,
+  position: Point,
+  message: String,
+  // RGB color composed of red, green and blue.
+  color: (u8, u8, u8),
+  quit: bool,
 }
 
 impl State {
-    fn change_color(&mut self, color: (u8, u8, u8)) {
-        self.color = color;
-    }
+  fn resize(&mut self, width: u64, height: u64) {
+      self.width = width;
+      self.height = height;
+  }
 
-    fn quit(&mut self) {
-        self.quit = true;
-    }
+  fn move_position(&mut self, point: Point) {
+      self.position = point;
+  }
 
-    fn echo(&mut self, s: String) { self.message = s }
+  fn echo(&mut self, s: String) {
+      self.message = s;
+  }
 
-    fn move_position(&mut self, p: Point) {
-        self.position = p;
-    }
+  fn change_color(&mut self, red: u8, green: u8, blue: u8) {
+      self.color = (red, green, blue);
+  }
 
-    fn process(&mut self, message: Message) {
-        // TODO: create a match expression to process the different message
-        // variants
-        // Remember: When passing a tuple as a function argument, you'll need
-        // extra parentheses: fn function((t, u, p, l, e))
-    }
+  fn quit(&mut self) {
+      self.quit = true;
+  }
+
+  fn process(&mut self, message: Message) {
+      // TODO: Create a match expression to process the different message
+      // variants using the methods defined above.
+      match message {
+        Message::Resize{ width, height } => self.resize(width, height),
+        Message::Move( position ) => self.move_position(position),
+        Message::Echo( message ) => self.echo(message),
+        Message::ChangeColor( r, g, b ) => self.change_color(r, g, b),
+        Message::Quit => self.quit(),
+      }
+  }
+}
+
+fn main() {
+  // You can optionally experiment here.
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+  use super::*;
 
-    #[test]
-    fn test_match_message_call() {
-        let mut state = State {
-            quit: false,
-            position: Point { x: 0, y: 0 },
-            color: (0, 0, 0),
-            message: "hello world".to_string(),
-        };
-        state.process(Message::ChangeColor(255, 0, 255));
-        state.process(Message::Echo(String::from("hello world")));
-        state.process(Message::Move(Point { x: 10, y: 15 }));
-        state.process(Message::Quit);
+  #[test]
+  fn test_match_message_call() {
+      let mut state = State {
+          width: 0,
+          height: 0,
+          position: Point { x: 0, y: 0 },
+          message: String::from("hello world"),
+          color: (0, 0, 0),
+          quit: false,
+      };
 
-        assert_eq!(state.color, (255, 0, 255));
-        assert_eq!(state.position.x, 10);
-        assert_eq!(state.position.y, 15);
-        assert_eq!(state.quit, true);
-        assert_eq!(state.message, "hello world");
-    }
+      state.process(Message::Resize {
+          width: 10,
+          height: 30,
+      });
+      state.process(Message::Move(Point { x: 10, y: 15 }));
+      state.process(Message::Echo(String::from("Hello world!")));
+      state.process(Message::ChangeColor(255, 0, 255));
+      state.process(Message::Quit);
+
+      assert_eq!(state.width, 10);
+      assert_eq!(state.height, 30);
+      assert_eq!(state.position.x, 10);
+      assert_eq!(state.position.y, 15);
+      assert_eq!(state.message, "Hello world!");
+      assert_eq!(state.color, (255, 0, 255));
+      assert!(state.quit);
+  }
 }
